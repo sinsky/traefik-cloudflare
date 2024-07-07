@@ -1,0 +1,54 @@
+services:
+  traefik:
+    image: traefik:v3.1
+    container_name: traefik
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 4000:2375
+      - 8080:8080
+    volumes:
+      - ./traefik.yml:/etc/traefik/traefik.yml
+    environment:
+      TZ: Asia/Tokyo
+      DOMAIN: ${DOMAIN}
+    networks:
+      - default
+      - traefik-network
+    labels:
+      traefik.docker.network: traefik-network
+  docker-proxy:
+    image: tecnativa/docker-socket-proxy:latest
+    restart: unless-stopped
+    container_name: docker-sock
+    environment:
+      CONTAINERS: 1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - default
+      - traefik-network
+    depends_on:
+      - traefik
+    labels:
+      traefik.enable: true
+      traefik.tcp.services.docker-sock.loadbalancer.server.port: 2375
+      traefik.tcp.routers.docker-sock.service: docker-sock
+      traefik.tcp.routers.docker-sock.tls: true
+  cloudflared:
+    image: cloudflare/cloudflared
+    restart: always
+    container_name: cloudflared
+    command: tunnel run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN}
+    networks:
+      - traefik-network
+    depends_on:
+      - traefik
+
+networks:
+  default:
+    name: traefik_default
+  traefik-network:
+    external: true

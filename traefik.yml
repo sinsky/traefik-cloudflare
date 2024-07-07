@@ -1,0 +1,14 @@
+providers:
+  docker:
+    network: traefik-network
+    exposedByDefault: false
+    endpoint: tcp://docker-proxy:2375
+    defaultRule: Host(`{{ index .Labels "traefik.host" }}.{{ env "DOMAIN" }}`)
+
+api:
+  insecure: true
+  dashboard: true
+
+entryPoints:
+  web:
+    address: ":80"
