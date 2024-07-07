@@ -4,8 +4,8 @@ services:
     container_name: traefik
     restart: unless-stopped
     ports:
-      - 80:80
-      - 8080:8080
+      - 80:80 # HTTP port
+      - 8080:8080 # dashboard port
     volumes:
       - ./traefik.yml:/etc/traefik/traefik.yml
     environment:
