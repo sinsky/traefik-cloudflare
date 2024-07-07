@@ -5,7 +5,6 @@ services:
     restart: unless-stopped
     ports:
       - 80:80
-      - 4000:2375
       - 8080:8080
     volumes:
       - ./traefik.yml:/etc/traefik/traefik.yml
